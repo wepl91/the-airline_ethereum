@@ -29,5 +29,10 @@
   "license": "ISC",
   "dependencies": {
     "@truffle/contract": "^4.3.25"
+  },
+  "babel": {
+    "presets": [
+      "babel-preset-react"
+    ]
   }
 }
