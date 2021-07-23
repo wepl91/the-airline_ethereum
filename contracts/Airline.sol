@@ -13,6 +13,7 @@ contract Airline {
     uint price; //In wei
   }
   Flight[] public flights;
+  uint etherPerPoint = 0.5 ether;
   mapping(address => Customer) public customers;
   mapping(address => Flight[]) public customerFlights;
   mapping(address => uint) public customerTotalFlights;
@@ -26,6 +27,11 @@ contract Airline {
     flights.push(Flight('Madrid', 2 ether));
   }
 
+  modifier isOwner() {
+    require(msg.sender == owner);
+    _;
+  }
+
   function buyFlight(uint flightIndex) public payable {
     Flight memory flight = flights[flightIndex];
     require(msg.value == flight.price);
@@ -37,5 +43,24 @@ contract Airline {
     customerTotalFlights[msg.sender] ++;
 
     emit flightPurchased(msg.sender, flight.price);
+  }
+
+  function getTotalFlights() public view returns (uint) {
+    return flights.length;
+  }
+
+  function redeemLoyaltyPoints() public {
+    Customer storage customer = customers[msg.sender];
+    uint etherToRefund = etherPerPoint * customer.loyaltyPoints;
+    payable(msg.sender).transfer(etherToRefund);
+    customer.loyaltyPoints = 0;
+  }
+
+  function getAirlineBalance() public isOwner view returns (uint) {
+    return address(this).balance;
+  }
+
+  function getRefundableEther() public view returns (uint) {
+    return etherPerPoint * customers[msg.sender].loyaltyPoints;
   }
 }
